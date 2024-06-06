@@ -1,0 +1,32 @@
+import seaborn as sns
+
+# Prepare data for heatmap
+heatmap_data_fric = results_with_age.pivot("Age CE", "Community", "Functional Richness (FRic)")
+heatmap_data_feve = results_with_age.pivot("Age CE", "Community", "Functional Evenness (FEve)")
+heatmap_data_fdiv = results_with_age.pivot("Age CE", "Community", "Functional Divergence (FDiv)")
+
+# Set up the plot
+fig, axs = plt.subplots(3, 1, figsize=(14, 18), sharex=True)
+
+# Plot heatmaps
+sns.heatmap(heatmap_data_fric, ax=axs[0], cmap="YlGnBu", cbar=True, annot=True, fmt=".2f")
+sns.heatmap(heatmap_data_feve, ax=axs[1], cmap="YlOrRd", cbar=True, annot=True, fmt=".2f")
+sns.heatmap(heatmap_data_fdiv, ax=axs[2], cmap="BuPu", cbar=True, annot=True, fmt=".2f")
+
+# Set titles
+axs[0].set_title('Functional Richness (FRic)', fontsize=16, weight='bold')
+axs[1].set_title('Functional Evenness (FEve)', fontsize=16, weight='bold')
+axs[2].set_title('Functional Divergence (FDiv)', fontsize=16, weight='bold')
+
+# Set common labels
+axs[2].set_xlabel('Community', fontsize=14, weight='bold')
+for ax in axs:
+    ax.set_ylabel('Year CE', fontsize=14, weight='bold')
+
+# Adjust layout
+plt.tight_layout(rect=[0, 0, 1, 0.96])
+fig.suptitle('Functional Diversity Indices Heatmaps Across Years', fontsize=20, weight='bold')
+
+# Display the plot
+plt.show()
+
