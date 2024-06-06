@@ -1,0 +1,110 @@
+CV analysis (Coeficient Variation analysis) to understand the resistance of community over climate change periods for the past 2,000 years. These climate periods are: These intervals include the Roman Warming Period (RWP; ~0-200 CE), Dark Age Cold Period (DACP; ~200-550 CE), Sui and Tang Dynasties Warm Period (S&TWP; 550-700 CE), Medieval Climate Anomaly (MCA; 900-1400 CE), Little Ice Age (LIA; 1400-1850 CE), and Current Warming Period (CWP; 1850 CE). 
+
+# Coefficient of variation analysis (Cladocera)
+
+import pandas as pd
+
+# Load the data from the Excel file
+data_path = "/mnt/data/Cladocera_Diversity_Indices.xlsx"
+data = pd.read_excel(data_path)
+
+# Display the first few rows of the dataset to understand its structure
+data.head()
+
+# Organize data into these periods and compute CV for each
+# Define the climate periods in terms of CE years
+climate_periods = {
+    'RWP': (0, 200),
+    'DACP': (200, 550),
+    'S&TWP': (550, 700),
+    'MCA': (900, 1400),
+    'LIA': (1400, 1850),
+    'CWP': (1850, 2020)  # Assuming the dataset goes up to present (approximation to 2020)
+}
+
+# Function to calculate Coefficient of Variation (CV)
+def calculate_cv(data):
+    return data.std() / data.mean() * 100
+
+# Organizing data by climate periods and calculating CV for each diversity index
+cv_results = {}
+for period, (start, end) in climate_periods.items():
+    period_data = data[(data['Age CE'] >= start) & (data['Age CE'] <= end)]
+    cv_results[period] = {
+        'Species Richness CV': calculate_cv(period_data['Species Richness (S)']),
+        'Shannon Diversity CV': calculate_cv(period_data['Shannon Diversity (H\')']),
+        'Pielou\'s Evenness CV': calculate_cv(period_data['Pielou\'s Evenness (J\')']),
+        'Simpson\'s Dominance CV': calculate_cv(period_data['Simpson\'s Dominance (D)'])
+    }
+
+cv_results_df = pd.DataFrame(cv_results).T  # Transpose to make periods rows and indices columns
+cv_results_df
+
+# Plot the results for each and save as svg to work on inkscape
+import matplotlib.pyplot as plt
+
+# Plotting the CV results for each diversity index across climate periods
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+axes = axes.flatten()
+
+# Titles for subplots
+titles = ['Species Richness CV', 'Shannon Diversity CV', 'Pielou\'s Evenness CV', 'Simpson\'s Dominance CV']
+
+# Plot each index in a subplot
+for i, col in enumerate(cv_results_df.columns):
+    axes[i].bar(cv_results_df.index, cv_results_df[col], color=plt.cm.Paired(i / len(cv_results_df.columns)))
+    axes[i].set_title(titles[i])
+    axes[i].set_ylabel('Coefficient of Variation (%)')
+    axes[i].set_xlabel('Climate Periods')
+    for label in axes[i].get_xticklabels():
+        label.set_rotation(45)
+        label.set_horizontalalignment('right')
+
+# Adjust layout
+plt.tight_layout()
+
+# Save the plot as SVG
+svg_path = "/mnt/data/CV_Results_Plot.svg"
+plt.savefig(svg_path, format='svg')
+
+plt.show()
+svg_path
+
+
+# Using correct settings for markers and lines
+plt.style.use('seaborn-whitegrid')  # Using a clean and popular style for scientific figures
+
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Reassign correct markers and lines
+colors = ['blue', 'green', 'red', 'cyan']
+line_styles = ['-', '--', '-.', ':']
+markers = ['o', '^', 's', 'd']  # Corrected markers to valid symbols
+
+# Plot each diversity index with distinct style
+for i, col in enumerate(cv_results_df.columns):
+    ax.plot(cv_results_df.index, cv_results_df[col], linestyle=line_styles[i], color=colors[i], marker=markers[i], label=titles[i], markersize=8, linewidth=2)
+
+# Adding labels and title
+ax.set_xlabel('Climate Periods', fontsize=14)
+ax.set_ylabel('Coefficient of Variation (%)', fontsize=14)
+ax.set_title('Coefficient of Variation Analysis Across Climate Periods', fontsize=16)
+
+# Rotating x-tick labels for better visibility
+ax.set_xticklabels(cv_results_df.index, rotation=45, ha='right', fontsize=12)
+
+# Adding a legend to differentiate the lines
+ax.legend(title='Diversity Indices', fontsize=12, title_fontsize='13')
+
+# Tight layout for clean spacing
+plt.tight_layout()
+
+# Save the combined plot as SVG
+combined_svg_path_fixed = "/mnt/data/Combined_CV_Results_Plot_Fixed.svg"
+plt.savefig(combined_svg_path_fixed, format='svg')
+
+plt.show()
+combined_svg_path_fixed
+
+
+

@@ -1,0 +1,130 @@
+# Diversity index and Temperature anomalies analysis 
+
+# Analysis of Diversity Indices and Temperature Anomalies
+# Author: Luciane Fontana
+
+# import libraries 
+
+import pandas as pd
+import numpy as np
+from scipy.stats import spearmanr, mannwhitneyu
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Define function to assign climate periods based on age ranges
+def assign_period_corrected(age):
+    if age >= 1850:
+        return 'CWP'
+    elif 550 <= age < 700:
+        return 'S&TWP'
+    elif 200 <= age < 550:
+        return 'DACP'
+    elif 900 <= age < 1400:
+        return 'MCA'
+    elif 1400 <= age < 1850:
+        return 'LIA'
+    elif 0 <= age < 200:
+        return 'RWP'
+    else:
+        return None
+
+# Load data
+diversity_indices_path = 'path/to/diversity_indices.csv'  # Update with actual path
+ge_temperature_path = 'path/to/ge_temperature_data.csv'  # Update with actual path
+huang_temperature_path = 'path/to/huang_temperature_data.csv'  # Update with actual path
+
+diversity_data = pd.read_csv(diversity_indices_path)
+ge_temperature_data = pd.read_csv(ge_temperature_path)
+huang_temperature_data = pd.read_csv(huang_temperature_path)
+
+# Assign climate periods to temperature data
+ge_temperature_data['Climate Period'] = ge_temperature_data['Age (cal yr AD)'].apply(assign_period_corrected)
+huang_temperature_data['Climate Period'] = huang_temperature_data['Age (cal yr AD)'].apply(assign_period_corrected)
+
+# Calculate median temperature for classification
+ge_median_temp = ge_temperature_data['Reconstructed temperature'].median()
+huang_median_temp = huang_temperature_data['Temperature Anomaly (°C)'].median()
+
+# Classify temperature data
+ge_temperature_data['Temperature Category'] = ge_temperature_data['Reconstructed temperature'].apply(
+    lambda x: 'High' if x > ge_median_temp else 'Low')
+huang_temperature_data['Temperature Category'] = huang_temperature_data['Temperature Anomaly (°C)'].apply(
+    lambda x: 'High' if x > huang_median_temp else 'Low')
+
+# Ensure matching periods
+valid_periods = diversity_data['Climate Period'].unique()
+filtered_ge_temperature_data = ge_temperature_data[ge_temperature_data['Climate Period'].isin(valid_periods)]
+filtered_huang_temperature_data = huang_temperature_data[huang_temperature_data['Climate Period'].isin(valid_periods)]
+
+# Function to merge diversity data with temperature categories
+def merge_diversity_temperature(diversity_df, temp_data, temp_col, median_temp):
+    temp_data['Temperature Category'] = temp_data[temp_col].apply(
+        lambda x: 'High' if x > median_temp else 'Low')
+    diversity_temp_df = diversity_df.copy()
+    diversity_temp_df['Temperature Category'] = temp_data['Temperature Category'].values
+    return diversity_temp_df
+
+# Merge diversity indices with filtered temperature categories
+ge_shannon_df = merge_diversity_temperature(diversity_data, filtered_ge_temperature_data, 'Reconstructed temperature', ge_median_temp)
+huang_shannon_df = merge_diversity_temperature(diversity_data, filtered_huang_temperature_data, 'Temperature Anomaly (°C)', huang_median_temp)
+
+# Reshape the DataFrames from wide format to long format
+ge_shannon_long = ge_shannon_df.melt(id_vars=['Temperature Category'], var_name='Period', value_name='Shannon Diversity')
+huang_shannon_long = huang_shannon_df.melt(id_vars=['Temperature Category'], var_name='Period', value_name='Shannon Diversity')
+
+# Perform bootstrapping analysis
+def bootstrap(data, category_col, value_col, n_resamples=1000):
+    low = data[data[category_col] == 'Low'][value_col].values
+    high = data[data[category_col] == 'High'][value_col].values
+    diff_means = []
+    for _ in range(n_resamples):
+        low_resample = np.random.choice(low, size=len(low), replace=True)
+        high_resample = np.random.choice(high, size=len(high), replace=True)
+        diff_means.append(high_resample.mean() - low_resample.mean())
+    return np.percentile(diff_means, [2.5, 97.5]), np.mean(diff_means)
+
+# Perform bootstrapping for the Ge and Huang data
+ge_shannon_ci, ge_shannon_diff_mean = bootstrap(ge_shannon_long, 'Temperature Category', 'Shannon Diversity')
+huang_shannon_ci, huang_shannon_diff_mean = bootstrap(huang_shannon_long, 'Temperature Category', 'Shannon Diversity')
+
+# Display the results
+print("Ge Shannon Diversity CI:", ge_shannon_ci, "Mean Difference:", ge_shannon_diff_mean)
+print("Huang Shannon Diversity CI:", huang_shannon_ci, "Mean Difference:", huang_shannon_diff_mean)
+
+# Visualization
+def plot_box(data, title, ylabel, ax):
+    sns.boxplot(data=data, x='Temperature Category', y='Shannon Diversity', ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel('Temperature Category')
+    ax.set_ylabel(ylabel)
+
+fig, axs = plt.subplots(1, 2, figsize=(14, 7))
+
+plot_box(ge_shannon_long, 'Ge Shannon Diversity', 'Shannon Diversity Index (H\')', axs[0])
+plot_box(huang_shannon_long, 'Huang Shannon Diversity', 'Shannon Diversity Index (H\')', axs[1])
+
+plt.tight_layout()
+plt.savefig('diversity_temperature_analysis.png')
+plt.show()
+
+
+# Diversity and Temperature Analysis
+
+## Overview
+This repository contains the analysis script for investigating the relationship between diversity indices (Shannon Diversity Index and Simpson's Dominance Index) of various proxies and temperature anomalies reconstructed from historical climate data.
+
+## Files
+- `diversity_temperature_analysis.py`: Python script for data analysis.
+- `diversity_indices.csv`: Diversity indices data for different proxies across historical climate periods.
+- `ge_temperature_data.csv`: Reconstructed temperature data from Ge.
+- `huang_temperature_data.csv`: Reconstructed temperature data from Huang.
+
+## Usage
+1. Clone the repository.
+2. Place the required data files (`diversity_indices.csv`, `ge_temperature_data.csv`, `huang_temperature_data.csv`) in the same directory as the script.
+3. Run the script using Python:
+   ```bash
+   python diversity_temperature_analysis.py
+
+
+
