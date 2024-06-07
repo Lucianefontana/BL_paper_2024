@@ -1,0 +1,56 @@
+Wavelet Analysis Ljungqvist 2010
+Temperature 
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import pywt
+
+# Load the CSV file
+file_path = '/mnt/data/Ljungqvist, 2010.csv'
+data = pd.read_csv(file_path, encoding='latin1', delimiter=';')
+
+# Clean the column names by stripping any leading/trailing whitespace
+data.columns = data.columns.str.strip()
+
+# Clean the 'Age' column by replacing unusual characters
+data['Age'] = data['Age'].str.replace('', '-')
+
+# Convert 'Reconstructed temperature' to numeric, ensuring proper handling of decimal separator
+data['Reconstructed temperature'] = data['Reconstructed temperature'].str.replace(',', '.').astype(float)
+
+# Extract the relevant columns for analysis
+age = data['Age']
+temperature = data['Reconstructed temperature']
+
+# Convert age range to approximate central point for plotting
+age_centers = age.str.split('-').apply(lambda x: (int(x[0]) + int(x[1])) / 2)
+
+# Perform continuous wavelet transform
+scales = np.arange(1, 128)
+coefficients, frequencies = pywt.cwt(temperature, scales, 'cmor')
+
+# Plot the original time series
+plt.figure(figsize=(15, 5))
+plt.subplot(211)
+plt.plot(age_centers, temperature)
+plt.title('Reconstructed Temperature Over Time')
+plt.xlabel('Age (Years)')
+plt.ylabel('Temperature Anomaly')
+
+# Plot the wavelet power spectrum
+plt.subplot(212)
+plt.contourf(age_centers, frequencies, np.abs(coefficients), extend='both', cmap='jet')
+plt.yscale('log')
+plt.title('Wavelet Power Spectrum')
+plt.xlabel('Age (Years)')
+plt.ylabel('Frequency (Hz)')
+plt.colorbar(label='Power')
+
+# Save the plots as an SVG file
+svg_file_path = 'wavelet_analysis.svg'
+plt.tight_layout()
+plt.savefig(svg_file_path, format='svg')
+
+# Show the plot
+plt.show()
