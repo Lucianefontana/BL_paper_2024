@@ -1,4 +1,4 @@
-# Diversity index and Temperature anomalies analysis 
+Diversity index and Temperature anomalies analysis 
 
 # Analysis of Diversity Indices and Temperature Anomalies
 # Author: Luciane Fontana
@@ -29,8 +29,8 @@ def assign_period_corrected(age):
         return None
 
 # Load data
-diversity_indices_path = 'path/to/diversity_indices.csv'  # Update with actual path
-ge_temperature_path = 'path/to/ge_temperature_data.csv'  # Update with actual path
+diversity_indices_path = 'diversity_indices.csv'  
+ge_temperature_path = 'ge_temperature_data.csv'  
 huang_temperature_path = 'path/to/huang_temperature_data.csv'  # Update with actual path
 
 diversity_data = pd.read_csv(diversity_indices_path)
@@ -45,13 +45,13 @@ huang_temperature_data['Climate Period'] = huang_temperature_data['Age (cal yr A
 ge_median_temp = ge_temperature_data['Reconstructed temperature'].median()
 huang_median_temp = huang_temperature_data['Temperature Anomaly (°C)'].median()
 
-# Classify temperature data
+# Classify temperature data Ge et al 
 ge_temperature_data['Temperature Category'] = ge_temperature_data['Reconstructed temperature'].apply(
     lambda x: 'High' if x > ge_median_temp else 'Low')
 huang_temperature_data['Temperature Category'] = huang_temperature_data['Temperature Anomaly (°C)'].apply(
     lambda x: 'High' if x > huang_median_temp else 'Low')
 
-# Ensure matching periods
+# Ensure matching climate periods 
 valid_periods = diversity_data['Climate Period'].unique()
 filtered_ge_temperature_data = ge_temperature_data[ge_temperature_data['Climate Period'].isin(valid_periods)]
 filtered_huang_temperature_data = huang_temperature_data[huang_temperature_data['Climate Period'].isin(valid_periods)]
@@ -108,23 +108,7 @@ plt.savefig('diversity_temperature_analysis.png')
 plt.show()
 
 
-# Diversity and Temperature Analysis
 
-## Overview
-This repository contains the analysis script for investigating the relationship between diversity indices (Shannon Diversity Index and Simpson's Dominance Index) of various proxies and temperature anomalies reconstructed from historical climate data.
-
-## Files
-- `diversity_temperature_analysis.py`: Python script for data analysis.
-- `diversity_indices.csv`: Diversity indices data for different proxies across historical climate periods.
-- `ge_temperature_data.csv`: Reconstructed temperature data from Ge.
-- `huang_temperature_data.csv`: Reconstructed temperature data from Huang.
-
-## Usage
-1. Clone the repository.
-2. Place the required data files (`diversity_indices.csv`, `ge_temperature_data.csv`, `huang_temperature_data.csv`) in the same directory as the script.
-3. Run the script using Python:
-   ```bash
-   python diversity_temperature_analysis.py
 
 
 
