@@ -1,4 +1,4 @@
-CV analysis (Coeficient Variation analysis) to understand the resistance of community over climate change periods for the past 2,000 years. These climate periods are: These intervals include the Roman Warming Period (RWP; ~0-200 CE), Dark Age Cold Period (DACP; ~200-550 CE), Sui and Tang Dynasties Warm Period (S&TWP; 550-700 CE), Medieval Climate Anomaly (MCA; 900-1400 CE), Little Ice Age (LIA; 1400-1850 CE), and Current Warming Period (CWP; 1850 CE). 
+CV analysis (Coeficient Variation analysis) was used to understand the resistance of community over climate change periods for the past 2,000 years. These intervals include the Roman Warming Period (RWP; ~0-200 CE), Dark Age Cold Period (DACP; ~200-550 CE), Sui and Tang Dynasties Warm Period (S&TWP; 550-700 CE), Medieval Climate Anomaly (MCA; 900-1400 CE), Little Ice Age (LIA; 1400-1850 CE), and Current Warming Period (CWP; 1850 CE). 
 
 # Coefficient of variation analysis (Cladocera)
 
@@ -11,7 +11,7 @@ data = pd.read_excel(data_path)
 # Display the first few rows of the dataset to understand its structure
 data.head()
 
-# Organize data into these periods and compute CV for each
+# Organize data into climate periods and compute CV for each
 # Define the climate periods in terms of CE years
 climate_periods = {
     'RWP': (0, 200),
@@ -19,14 +19,14 @@ climate_periods = {
     'S&TWP': (550, 700),
     'MCA': (900, 1400),
     'LIA': (1400, 1850),
-    'CWP': (1850, 2020)  # Assuming the dataset goes up to present (approximation to 2020)
+    'CWP': (1850, 2020)  
 }
 
 # Function to calculate Coefficient of Variation (CV)
 def calculate_cv(data):
     return data.std() / data.mean() * 100
 
-# Organizing data by climate periods and calculating CV for each diversity index
+# Organizing data by climate periods and calculate CV for each diversity index
 cv_results = {}
 for period, (start, end) in climate_periods.items():
     period_data = data[(data['Age CE'] >= start) & (data['Age CE'] <= end)]
@@ -37,10 +37,10 @@ for period, (start, end) in climate_periods.items():
         'Simpson\'s Dominance CV': calculate_cv(period_data['Simpson\'s Dominance (D)'])
     }
 
-cv_results_df = pd.DataFrame(cv_results).T  # Transpose to make periods rows and indices columns
 cv_results_df
 
 # Plot the results for each and save as svg to work on inkscape
+
 import matplotlib.pyplot as plt
 
 # Plotting the CV results for each diversity index across climate periods
@@ -64,9 +64,6 @@ for i, col in enumerate(cv_results_df.columns):
 plt.tight_layout()
 
 # Save the plot as SVG
-svg_path = "/mnt/data/CV_Results_Plot.svg"
-plt.savefig(svg_path, format='svg')
-
 plt.show()
 svg_path
 
@@ -79,7 +76,7 @@ fig, ax = plt.subplots(figsize=(12, 8))
 # Reassign correct markers and lines
 colors = ['blue', 'green', 'red', 'cyan']
 line_styles = ['-', '--', '-.', ':']
-markers = ['o', '^', 's', 'd']  # Corrected markers to valid symbols
+markers = ['o', '^', 's', 'd']  
 
 # Plot each diversity index with distinct style
 for i, col in enumerate(cv_results_df.columns):
