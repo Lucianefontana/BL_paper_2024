@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 file_path = 'Ge.xlsx'
 xls = pd.ExcelFile(file_path)
 
-# Load the data from the sheet "Ge et al., 2013"
+# Load the data from "Ge et al., 2013"
 data_ge = pd.read_excel(file_path, sheet_name='Ge et al., 2013')
 
 # Load the Bray-Curtis dissimilarity results data
@@ -44,8 +44,8 @@ sns.regplot(x='Reconstructed temperature', y='BC to Baseline', data=merged_data,
 
 # Add labels and title
 plt.xlabel('Reconstructed Temperature')
-plt.ylabel('Bray-Curtis Dissimilarity to Baseline')
-plt.title('Regression Analysis: BC to Baseline vs Reconstructed Temperature')
+plt.ylabel('Bray-Curtis Dissimilarity to Baseline Conditions')
+plt.title('Regression Analysis: BC dissimilarity vs Reconstructed Temperature')
 
 # Show plot
 plt.show()
