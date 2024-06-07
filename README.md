@@ -1,4 +1,4 @@
-This analysis explores four biotic proxies and paleoenvironmental datasets from Bosten Lake. The proxies include diatoms, cladocerans, ostracodes, and Pediastrum (green algae).
+These analysis explores four biotic proxies and paleoenvironmental datasets from Bosten Lake. The proxies include diatoms, cladocerans, ostracodes, and Pediastrum (green algae).
 
 The analysis includes various plots and panels for visual representation.
 
