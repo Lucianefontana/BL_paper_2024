@@ -1,0 +1,61 @@
+Wavelet Analysis Precipitation 
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+import pywt
+
+# Load the CSV file with the correct delimiter and decimal settings
+file_path = '/mnt/data/chen2010 - LIMPO.xlsx'
+data_precip = pd.read_csv(file_path, delimiter=';', decimal=',')
+
+# Extract the relevant columns for analysis
+age = data_precip['Year']
+precipitation_a = data_precip['Precipitation A']
+precipitation_b = data_precip['Precipitation B']
+
+# Perform continuous wavelet transform for Precipitation A
+scales = np.arange(1, 128)
+coefficients_a, frequencies_a = pywt.cwt(precipitation_a, scales, 'cmor')
+
+# Perform continuous wavelet transform for Precipitation B
+coefficients_b, frequencies_b = pywt.cwt(precipitation_b, scales, 'cmor')
+
+# Plot the original time series and wavelet power spectrum for Precipitation A
+plt.figure(figsize=(15, 10))
+plt.subplot(221)
+plt.plot(age, precipitation_a)
+plt.title('Precipitation A Over Time')
+plt.xlabel('Year')
+plt.ylabel('Precipitation A')
+
+plt.subplot(222)
+plt.contourf(age, frequencies_a, np.abs(coefficients_a), extend='both', cmap='jet')
+plt.title('Wavelet Power Spectrum for Precipitation A')
+plt.xlabel('Year')
+plt.ylabel('Frequency (Hz)')
+plt.colorbar(label='Power')
+
+# Plot the original time series and wavelet power spectrum for Precipitation B
+plt.subplot(223)
+plt.plot(age, precipitation_b)
+plt.title('Precipitation B Over Time')
+plt.xlabel('Year')
+plt.ylabel('Precipitation B')
+
+plt.subplot(224)
+plt.contourf(age, frequencies_b, np.abs(coefficients_b), extend='both', cmap='jet')
+plt.title('Wavelet Power Spectrum for Precipitation B')
+plt.xlabel('Year')
+plt.ylabel('Frequency (Hz)')
+plt.colorbar(label='Power')
+
+# Save the plots as SVG files
+svg_file_path_a = 'wavelet_analysis_precipitation_a.svg'
+svg_file_path_b = 'wavelet_analysis_precipitation_b.svg'
+plt.tight_layout()
+plt.savefig(svg_file_path_a, format='svg')
+plt.savefig(svg_file_path_b, format='svg')
+
+# Show the plots
+plt.show()
