@@ -11,7 +11,7 @@ from tslearn.clustering import TimeSeriesKMeans
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 
 # Load the Excel file
-file_path = 'path_to/Ge.xlsx'
+file_path = 'Ge.xlsx'
 xls = pd.ExcelFile(file_path)
 
 # Load the data from the sheet "Ge et al., 2013"
