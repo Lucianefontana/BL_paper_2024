@@ -1,0 +1,51 @@
+Bray Curtis analysis in relation to baseline conditions (Cladocera)
+
+# Regression Analysis (Temperature reconstructed and Disimilarity Cladocera using Bray curtis index)
+
+import pandas as pd
+import statsmodels.api as sm
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load the Excel file
+file_path = 'Ge.xlsx'
+xls = pd.ExcelFile(file_path)
+
+# Load the data from the sheet "Ge et al., 2013"
+data_ge = pd.read_excel(file_path, sheet_name='Ge et al., 2013')
+
+# Load the Bray-Curtis dissimilarity results data
+bc_file_path = 'path_to/bray_curtis_dissimilarity_resultsCLA.csv'
+bc_data = pd.read_csv(bc_file_path, delimiter=';', decimal=',')
+
+# Round the Age CE values to the nearest integer
+bc_data['Age CE'] = bc_data['Age CE'].round().astype(int)
+data_ge['Age (AD)'] = data_ge['Age (AD)'].round().astype(int)
+
+# Merge the datasets based on the rounded Age CE
+merged_data = pd.merge(bc_data, data_ge, left_on='Age CE', right_on='Age (AD)', how='inner')
+
+# Define the independent variable (Reconstructed temperature) and dependent variable (BC to Baseline)
+X = merged_data['Reconstructed temperature']
+y = merged_data['BC to Baseline']
+
+# Add a constant to the independent variable
+X = sm.add_constant(X)
+
+# Fit the regression model
+model = sm.OLS(y, X).fit()
+
+# Display the regression results
+print(model.summary())
+
+# Create a scatter plot with a regression line
+plt.figure(figsize=(10, 6))
+sns.regplot(x='Reconstructed temperature', y='BC to Baseline', data=merged_data, ci=None)
+
+# Add labels and title
+plt.xlabel('Reconstructed Temperature')
+plt.ylabel('Bray-Curtis Dissimilarity to Baseline')
+plt.title('Regression Analysis: BC to Baseline vs Reconstructed Temperature')
+
+# Show plot
+plt.show()

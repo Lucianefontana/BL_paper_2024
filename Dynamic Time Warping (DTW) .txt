@@ -1,0 +1,67 @@
+Dynamic Time Warping (DTW) 
+
+To identify patterns and group similar segments of the time series data. This will help us understand if there are any distinct periods where the Bray-Curtis dissimilarity and temperature changes show unique patterns.
+
+CODE
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from tslearn.clustering import TimeSeriesKMeans
+from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+
+# Load the Excel file
+file_path = 'path_to/Ge.xlsx'
+xls = pd.ExcelFile(file_path)
+
+# Load the data from the sheet "Ge et al., 2013"
+data_ge = pd.read_excel(file_path, sheet_name='Ge et al., 2013')
+
+# Load the Bray-Curtis dissimilarity results for Pediastrum
+bc_pediastrum_file_path = 'path_to/bray_curtis_dissimilarity_resultsPEDI.csv'
+bc_pediastrum_data = pd.read_csv(bc_pediastrum_file_path, delimiter=';', decimal=',')
+
+# Round the Age CE values to the nearest integer for all datasets
+bc_pediastrum_data['Age CE'] = bc_pediastrum_data['Age CE'].round().astype(int)
+data_ge['Age (AD)'] = data_ge['Age (AD)'].round().astype(int)
+
+# Align the datasets by merging on 'Age CE'
+aligned_data = pd.merge(bc_pediastrum_data[['Age CE', 'BC to Baseline']], data_ge[['Age (AD)', 'Reconstructed temperature']], left_on='Age CE', right_on='Age (AD)', how='inner')
+
+# Drop the 'Age (AD)' column as it's redundant after merging
+aligned_data = aligned_data.drop(columns=['Age (AD)'])
+
+# Prepare the data for clustering
+# Combine BC to Baseline and Reconstructed temperature into a single time series array
+combined_data = np.column_stack((aligned_data['BC to Baseline'], aligned_data['Reconstructed temperature']))
+
+# Scale the time series data
+scaler = TimeSeriesScalerMeanVariance()
+combined_data_scaled = scaler.fit_transform(combined_data)
+
+# Perform Time Series Clustering using K-means
+n_clusters = 3
+km = TimeSeriesKMeans(n_clusters=n_clusters, metric="dtw", max_iter=10, random_state=0)
+labels = km.fit_predict(combined_data_scaled)
+
+# Add cluster labels to the dataframe
+aligned_data['Cluster'] = labels
+
+# Plot the clustered time series
+fig, ax = plt.subplots(figsize=(12, 8))
+
+# Plot each cluster with different colors
+for cluster in range(n_clusters):
+    cluster_data = aligned_data[aligned_data['Cluster'] == cluster]
+    ax.plot(cluster_data['Age CE'], cluster_data['BC to Baseline'], label=f'Cluster {cluster} - BC to Baseline')
+    ax.plot(cluster_data['Age CE'], cluster_data['Reconstructed temperature'], label=f'Cluster {cluster} - Reconstructed Temperature')
+
+ax.set_title('Time Series Clustering of Bray-Curtis Dissimilarity and Reconstructed Temperature (Pediastrum)', fontsize=14)
+ax.set_xlabel('Age CE', fontsize=12)
+ax.set_ylabel('Values', fontsize=12)
+ax.legend()
+ax.grid(True)
+
+# Show the plot
+plt.tight_layout()
+plt.show()
